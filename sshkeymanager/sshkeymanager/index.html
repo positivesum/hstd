@@ -1,0 +1,45 @@
+<cpanel Branding="include(stdheader.html)">
+<cpanel setvar="dprefix=../">
+<style>
+    <?cp Branding::spritelist(
+            .spriteicon_img_mini {
+                float:          left;
+                margin-right:   5px;
+                background:     url\{leftparenthesis}%\{rightparenthesis};
+            }
+            %,
+            spriteurl,
+            images::
+            #icon-${img}_mini {
+                background-position \{colon}0 -${cssposition}px;
+                width               \{colon}${width}px;
+                height              \{colon}${height}px;
+            }
+            :
+        )
+        imgtype=icon,
+        subtype=img,
+        method=scale_60percent,
+        format=png,
+        img=sshkeymanager,
+    ?>
+</style>
+
+<div class="body-content">
+
+    <div class="h1Title">
+        <div class="spriteicon_img_mini" id="icon-sshkeymanager_mini"></div>
+        SSH Key Manager
+    </div>
+
+    <h2>Your public key</h2>
+    <p class="description">This is the public key that you can use to access repositories via SSH on hosting services like github.com</p>
+    <div class="highlight">
+        <?cp SSH::fetchkey(%,key) name=id_rsa,pub=1, ?>
+    </div>
+
+    <h2>Authorized users</h2>
+    <p class="description">These are users who authorized to access your account using their public keys (users can log in without giving the password).</p>
+</div>
+
+<cpanel Branding="include(stdfooter.html)">

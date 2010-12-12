@@ -1,0 +1,7 @@
+Installation
+------------
+Run as root
+
+    perl pluginname/install.pl
+
+This will install and register plugin and modules.
