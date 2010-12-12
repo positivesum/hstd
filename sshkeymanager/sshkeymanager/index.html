@@ -1,5 +1,5 @@
 <cpanel Branding="include(stdheader.html)">
-<cpanel setvar="dprefix=../">
+
 <style>
     <?cp Branding::spritelist(
             .spriteicon_img_mini {
@@ -23,7 +23,37 @@
         format=png,
         img=sshkeymanager,
     ?>
+
+    .q {
+        background-color: #fdffb4;
+        color: #333333;
+        border: solid 1px #fcc90d;
+        margin-left: 10px;
+        padding: 0 4px 0 4px;
+    }
 </style>
+
+<script type="text/javascript">
+//<![CDATA[
+	YAHOO.namespace("tooltip.container");
+    YAHOO.tooltip.container.pubkey = new YAHOO.widget.Tooltip(
+        "pubkey",
+        {
+            context: "pubkeyctx",
+            text:    "<center>This is the public key that<br>you can use to access<br>repositories via SSH on hosting<br>services like github.com</center>"
+        }
+    );
+
+    YAHOO.tooltip.container.authkey = new YAHOO.widget.Tooltip(
+        "authkey",
+        {
+            context: "authkeyctx",
+            text:    "<center>These are users who authorized<br>to access your account<br>using their public keys<br>(users can log in without giving the password).</center>"
+        }
+    );
+
+//]]>
+</script>
 
 <div class="body-content">
 
@@ -32,14 +62,14 @@
         SSH Key Manager
     </div>
 
-    <h2>Your public key</h2>
-    <p class="description">This is the public key that you can use to access repositories via SSH on hosting services like github.com</p>
-    <div class="highlight">
-        <?cp SSH::fetchkey(%,key) name=id_rsa,pub=1, ?>
-    </div>
+    <p>
+        <h2>Your public key<span id="pubkeyctx" class="q">?</span></h2>
+        <?cptt SSH::fetchkey(sshkeymanager/publickeys.tmpl) ?>
+    </p>
 
-    <h2>Authorized users</h2>
-    <p class="description">These are users who authorized to access your account using their public keys (users can log in without giving the password).</p>
+    <p>
+        <h2>Authorized users<span id="authkeyctx" class="q">?</span></h2>
+    </p>
 </div>
 
 <cpanel Branding="include(stdfooter.html)">

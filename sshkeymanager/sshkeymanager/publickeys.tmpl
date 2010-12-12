@@ -1,0 +1,8 @@
+[% IF return_.0.key %]
+    <textarea cols="75" class="output" rows="5" id="key_area">[% return_.0.key %]</textarea>
+[% ELSE %]
+    <p>You don't have a Public/Private key created.</p>
+    <form method="post" action="doaddkey.html">
+        <p><input type="submit" class="input-button" value="Create Key"/></p>
+    </form>
+[% END %]
