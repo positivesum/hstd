@@ -1,3 +1,4 @@
+<cpanel setvar="dprefix=../../">
 <cpanel Branding="include(stdheader.html)">
 
 <style>
@@ -26,15 +27,17 @@
 </style>
 
 <div class="body-content">
-
+    
     <div class="h1Title">
         <div class="spriteicon_img_mini" id="icon-sshkeymanager_mini"></div>
-        SSH Key Generator
+        Add authorized key
     </div>
-    <?cp SSH::genkey(,) bits=1024,type=rsa,name=id_rsa ?>        
-    Key generation complete.
-    <div class="return-link"><a href="index.html">&larr; Go Back</a></div>
-    
+    <form method="post" action="doimport.html">
+        <textarea cols="75" rows="5" name="key"></textarea>
+        <p><input type="submit" class="input-button" value="Add key"/></p>
+    </form>
+    <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>    
+
 </div>
 
 <cpanel Branding="include(stdfooter.html)">

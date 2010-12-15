@@ -1,3 +1,4 @@
+<cpanel setvar="dprefix=../">
 <cpanel Branding="include(stdheader.html)">
 
 <style>
@@ -64,12 +65,18 @@
 
     <p>
         <h2>Your public key<span id="pubkeyctx" class="q">?</span></h2>
-        <?cptt SSH::fetchkey(sshkeymanager/publickeys.tmpl) ?>
+        <?cp SSHKeyManager::fetchkey(
+            [textarea cols="75" rows="5" class="output"]%[/textarea],key) name=id_rsa,pub=1 ||
+            [form method="post" action="keys/dogenkey.html"]
+                [p][input type="submit" class="input-button" value="Create Key"/][/p]
+            [/form]
+        ?>
     </p>
-
-    <p>
-        <h2>Authorized users<span id="authkeyctx" class="q">?</span></h2>
-    </p>
+    <p><h2>Authorized keys<span id="authkeyctx" class="q">?</span></h2></p>
+    <?cp SSHAuthorizedKeys::listkeys(
+        [a style="margin-right: 10px;" href="authkeys/delkey.html?user=%"]\{leftbracket}-\{rightbracket}[/a]%[br], user,user)
+    ?>
+    <p><a href="authkeys/import.html">Add key</a></p>
 </div>
 
 <cpanel Branding="include(stdfooter.html)">

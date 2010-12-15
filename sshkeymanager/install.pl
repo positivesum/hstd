@@ -12,4 +12,5 @@ my $CPANEL = "/usr/local/cpanel";
 
 `cp -r sshkeymanager $CPANEL/base/frontend/x3`;
 `cp sshkeymanager.cpanelplugin $CPANEL/bin`;
+`cp lib/* $CPANEL/Cpanel`;
 `$CPANEL/bin/register_cpanelplugin $CPANEL/bin/sshkeymanager.cpanelplugin`;
