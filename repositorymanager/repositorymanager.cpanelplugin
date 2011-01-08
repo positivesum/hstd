@@ -1,0 +1,25 @@
+#cpanel plugin file 1.0 (for use with /usr/local/cpanel/bin/register_cpanelplugin)
+version: 1.0
+name:repositorymanager
+description:Repository Manager
+featuremanager:0
+url:repositorymanager/index.html
+acontent:
+onclick:
+if:
+itemorder:999
+itemdesc:Repository Manager
+group:advanced
+image:iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAACVElEQVRIx+1UMU/bQBT+zrnYjUms
+RKpQm6EjqAMwsJQu3RkqIeYOqBsLDKhCkSIyIPUX0ErZu3dgqBRSFQmBRKROdCmqWhJKJQSJLcLF
+9tm+DmeStLFpJcSC8qbn9z6/773v7h4RQuA2TcEt25BgSHBzI59nZpzj48FEamxsamsLgLWz82V+
+XtG0QUx+cfHR6iqAo/X1X+VyJAF1Tk7sRoMMJBKZjHQC23ZOTwcnFYBnWdL3Wi2n0Ygm8EzTi0r4
+phkW4pzHSBkwFoIZ43ESXbMqhBCEkH+qfD2M3JVd1D/H/8wUiYkM9iSaeDNhaIau6pUXlcii1e/V
+QrVACZ17PLfydCUSU/pUqnyr2J5dfl6efjgNgHZzB0cHSCGtpeO6PmNn+/V9KJh8MBmHOWwe7jZ2
+wWHZVtQZEChEiRtZT+oSoybUOGWSShIEAEaSI2HJqbdTdauuEOWcnYOAgORSOSHE+P3xvZd7ALZ/
+bM++m9Wo5vrupXspCdLJtIBYerK09mwNQPFjcaO2QUDavO36LgQyWoYqFAA1HbPVacnWZDtN1gRg
+OeGMPODMZizBuhjXc5teE4DNbYlhHguLSAzBhXMRvmTTNtEBAKITAQFAfnZF5AEHAyiQAORC8gE3
+rBsScCb/gnp1rC7gXykoDa+AEozXRjcSBIHos82vmygCJSx/WO6P98MW3i+gBBRQ+1mTEWVghfVO
+7K8F0Hbb0rE9+4+b0QdzfEc6PYl6l8TQs6lsWo29pimaGjVGqUKzWjYOk7uXy2fyHd5RqXrHdtGQ
+YEhwA/sNhFRBol1nOKEAAAAASUVORK5CYII=
+

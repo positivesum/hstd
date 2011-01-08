@@ -1,0 +1,87 @@
+<!--
+HSTD Repository Manager
+Copyright (C) 2010 HSTD.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<cpanel setvar="dprefix=../">
+<cpanel Branding="include(stdheader.html)">
+
+<style>
+    <?cp Branding::spritelist(
+            .spriteicon_img_mini {
+                float:          left;
+                margin-right:   5px;
+                background:     url\{leftparenthesis}%\{rightparenthesis};
+            }
+            %,
+            spriteurl,
+            images::
+            #icon-${img}_mini {
+                background-position \{colon}0 -${cssposition}px;
+                width               \{colon}${width}px;
+                height              \{colon}${height}px;
+            }
+            :
+        )
+        imgtype=icon,
+        subtype=img,
+        method=scale_60percent,
+        format=png,
+        img=repositorymanager,
+    ?>
+</style>
+
+<div class="body-content">
+
+    <div class="h1Title">
+        <div class="spriteicon_img_mini" id="icon-repositorymanager_mini"></div>
+        Repository Manager
+    </div>
+
+    <p class="description">Allows you to clone remote repositories and check them out into local directories.</p>
+
+    <!-- repositories -->
+    <div style="float:left;width:33%;">
+        <div class="h2Title">Repositories</div>
+        <p><a href="repo/addrepo.html">Add</a></p>
+        <?cp RepositoryManager::repo_list(%[br],repo_name) ?>
+    </div>
+
+    <!-- checkouts -->
+    <div>
+        <div class="h2Title">Checkouts</div>
+        <p><a href="repo/checkout.html">Add</a></p>
+    </div>
+
+    <!-- updates -->
+    <div style="clear:both;"></div>
+    <div style="margin-top:30px;">
+        <div class="h2Title">Updates</div>
+        <table>
+            <?cp RepositoryManager::recent_log(
+                [tr]
+                    [td]%[/td]
+                    [td]%[/td]
+                    [td]%[/td]
+                [/tr],
+                repo_name,abb_hash,subject,
+            ?>
+        </table>
+    </div>
+
+</div>
+
+<cpanel Branding="include(stdfooter.html)">

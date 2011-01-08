@@ -1,0 +1,90 @@
+<!--
+HSTD Repository Manager
+Copyright (C) 2010 HSTD.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<cpanel setvar="dprefix=../../">
+<cpanel Branding="include(stdheader.html)">
+
+<style>
+    <?cp Branding::spritelist(
+            .spriteicon_img_mini {
+                float:          left;
+                margin-right:   5px;
+                background:     url\{leftparenthesis}%\{rightparenthesis};
+            }
+            %,
+            spriteurl,
+            images::
+            #icon-${img}_mini {
+                background-position \{colon}0 -${cssposition}px;
+                width               \{colon}${width}px;
+                height              \{colon}${height}px;
+            }
+            :
+        )
+        imgtype=icon,
+        subtype=img,
+        method=scale_60percent,
+        format=png,
+        img=repositorymanager,
+    ?>
+</style>
+
+<div class="body-content">
+
+    <div class="h1Title">
+        <div class="spriteicon_img_mini" id="icon-repositorymanager_mini"></div>
+        Add Repository
+    </div>
+
+    <p class="description">By adding a repository you create a local clone of a remote repository.</p>
+
+    <form method="post" action="doaddrepo.html">
+        
+        <!-- existing remote -->
+        <div>
+            <input checked type="radio" name="repo_source" value="remote">
+            Existing remote
+            <select name="remote_type">
+                <option value="git">Git</option>
+                <option disabled value="hg">Hg</option>
+            </select>
+            repository from
+            <input type="text" name="remote_url"/>
+        </div>
+
+        <!-- new local -->
+        <div style="margin: 10px 0 10px 0;">
+            <input type="radio" name="repo_source" value="local">
+            New local
+            <select name="local_type">
+                <option value="git">Git</option>
+                <option disabled value="hg">Hg</option>
+            </select>
+            in <cpanel print="$homedir">/repos/
+            <input type="text" name="local_name"/>
+        </div>
+
+        <input type="submit" class="input-button" value="Add"/>
+
+    </form>
+
+    <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>    
+
+</div>
+
+<cpanel Branding="include(stdfooter.html)">

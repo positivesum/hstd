@@ -1,0 +1,109 @@
+<!--
+HSTD Repository Manager
+Copyright (C) 2010 HSTD.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<cpanel setvar="dprefix=../../">
+<cpanel Branding="include(stdheader.html)">
+
+<style>
+    <?cp Branding::spritelist(
+            .spriteicon_img_mini {
+                float:          left;
+                margin-right:   5px;
+                background:     url\{leftparenthesis}%\{rightparenthesis};
+            }
+            %,
+            spriteurl,
+            images::
+            #icon-${img}_mini {
+                background-position \{colon}0 -${cssposition}px;
+                width               \{colon}${width}px;
+                height              \{colon}${height}px;
+            }
+            :
+        )
+        imgtype=icon,
+        subtype=img,
+        method=scale_60percent,
+        format=png,
+        img=repositorymanager,
+    ?>
+</style>
+
+<script type="text/javascript">
+
+    function clone ( obj ) { return YAHOO.lang.JSON.parse( YAHOO.lang.JSON.stringify( obj ) ); }
+
+    var callback = {
+        success : function(o) {
+            var module_output = YAHOO.util.Dom.get("module-output");
+            try {
+                var data = YAHOO.lang.JSON.parse(o.responseText);
+            }
+            catch(e) {
+                YAHOO.util.Dom.get("module-output").innerHTML = e; return;
+            }
+            if ( data.cpanelresult.event.result == "1" ) {
+                module_output.innerHTML = "<pre>" + data.cpanelresult.data[0].output + "</pre>";
+            } else {
+                module_output.innerHTML = data.cpanelresult.event.reason;
+            }
+        },
+        failure : function(o) { }
+    };
+
+    var api2_base = {
+        "cpanel_jsonapi_version" : 2,
+        "cpanel_jsonapi_module" : "RepositoryManager",
+    };
+
+    <cpanelif $FORM{'repo_source'}=='remote'>
+        var api2_clone_remote = clone(api2_base);
+        api2_clone_remote.cpanel_jsonapi_func = "clone_remote";
+        api2_clone_remote.repo_type = "<cpanel print="$FORM{'remote_type'}">"
+        api2_clone_remote.repo_url =  "<cpanel print="$FORM{'remote_url'}">";
+
+        YAHOO.util.Event.onDOMReady(
+            YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_clone_remote), callback, '' )
+        );
+    </cpanelif>
+
+    <cpanelif $FORM{'repo_source'}=='local'>
+        var api2_init = clone(api2_base);
+        api2_init.cpanel_jsonapi_func = "init";
+        api2_init.repo_type = "<cpanel print="$FORM{'local_type'}">";
+        api2_init.repo_name = "<cpanel print="$FORM{'local_name'}">";
+        YAHOO.util.Event.onDOMReady(
+            YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_init), callback, '' )
+        );
+    </cpanelif>
+
+</script>
+
+<div class="body-content">
+
+    <div class="h1Title">
+        <div class="spriteicon_img_mini" id="icon-repositorymanager_mini"></div>
+        Add repository
+    </div>
+
+    <div id="module-output"></div>
+
+    <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>
+</div>
+
+<cpanel Branding="include(stdfooter.html)">
