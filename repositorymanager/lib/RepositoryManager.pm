@@ -80,8 +80,9 @@ sub repo_list {
     my @repo_list;
     foreach my $repo_name (@repos) {
         my $repo_type;
-        $repo_type = 'git' if -d repo_path() . $repo_name . "/.git";    # ugly. change this
-        $repo_type = 'hg'  if -d repo_path() . $repo_name . "/.hg";
+        my $repo_path = repo_path($repo_name);
+        $repo_type = 'git' if -d $repo_path . "/.git";    # ugly. change this
+        $repo_type = 'hg'  if -d $repo_path . "/.hg";
         push @repo_list, { repo_name => $repo_name, repo_type => $repo_type };
     }
     return @repo_list;
