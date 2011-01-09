@@ -130,6 +130,7 @@ sub api2_recent_log {
     my @RSD;
     foreach my $repo ( repo_list() ) {
         push @RSD, git_log( $repo->{repo_name} ) if $repo->{repo_type} eq 'git';
+        push @RSD, hg_log( $repo->{repo_name} )  if $repo->{repo_type} eq 'hg';
     }
     @RSD = sort { $b->{timestamp} <=> $a->{timestamp} } @RSD;
     return @RSD[ 0 .. 19 ];    # limit output to 20 records in total
@@ -153,7 +154,27 @@ sub git_log {
             timestamp => $2,
             subject   => $3,
         };
-    } `git --git-dir=$repo_path/.git log --pretty=format:'%h %ct %s'`;
+    } `git --git-dir=$repo_path/.git log -n 20 --pretty=format:'%h %ct %s'`;
+}
+
+=head2 hg_log
+
+Get Hg log
+
+=cut
+
+sub hg_log {
+    my $repo_name = shift;
+    my $repo_path = repo_path($repo_name);
+    return map {
+        /^(\S{12}) (\d{10}) \d+ (.*)$/;
+        {
+            repo_name => $repo_name,
+            abb_hash  => $1,
+            timestamp => $2,
+            subject   => $3,
+        }
+    } `hg log -l 20 --template '{node|short} {date|hgdate} {desc}\n' --cwd $repo_path`;
 }
 
 =head2 api2_init
@@ -379,6 +400,8 @@ sub api2_checkout_list {
         my ($checkout_name) = grep { /name=/ } <$fh>;
         map { s/.*=// } ($checkout_name);
         close $fh;
+
+        # will not work if parent repository was moved/deleted. add some magic later
         `git --git-dir=$repo_path/.git remote show origin 2>&1` =~ /Fetch URL: .*\b\/(.*)/;
         push @RSD, { cloned_from => $1, repo_name => $repo_name, checkout_name => $checkout_name };
 
