@@ -201,6 +201,12 @@ sub api2_init {
     if ( $OPTS{'repo_type'} eq 'git' ) {
         $output = `git init $repo_path 2>&1`;
     }
+    elsif ( $OPTS{'repo_type'} eq 'hg' ) {
+        $output = `hg init $repo_path 2>&1`;
+
+        # hg does not output anything if init successful
+        $output = "Initialized empty Hg repository in $repo_path" if not $output;
+    }
     return { output => $output };
 }
 
