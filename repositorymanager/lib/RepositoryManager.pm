@@ -376,14 +376,10 @@ sub api2_checkout_list {
         # use Config::Any for this
         my $repo_path = repo_path("../sites/$repo_name");
         open my $fh, "<$repo_path/.checkout";
-        my @lines = <$fh>;
-        close $fh;
-
-        my ($checkout_name) = grep { /name=/ } @lines;
+        my ($checkout_name) = grep { /name=/ } <$fh>;
         map { s/.*=// } ($checkout_name);
-
+        close $fh;
         `git --git-dir=$repo_path/.git remote show origin 2>&1` =~ /Fetch URL: .*\b\/(.*)/;
-
         push @RSD, { cloned_from => $1, repo_name => $repo_name, checkout_name => $checkout_name };
 
     }
