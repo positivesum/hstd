@@ -1,0 +1,140 @@
+<!--
+HSTD Repository Manager
+Copyright (C) 2010 HSTD.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<cpanel setvar="dprefix=../../">
+<cpanel Branding="include(stdheader.html)">
+
+<style>
+    <?cp Branding::spritelist(
+            .spriteicon_img_mini {
+                float:          left;
+                margin-right:   5px;
+                background:     url\{leftparenthesis}%\{rightparenthesis};
+            }
+            %,
+            spriteurl,
+            images::
+            #icon-${img}_mini {
+                background-position \{colon}0 -${cssposition}px;
+                width               \{colon}${width}px;
+                height              \{colon}${height}px;
+            }
+            :
+        )
+        imgtype=icon,
+        subtype=img,
+        method=scale_60percent,
+        format=png,
+        img=repositorymanager,
+    ?>
+</style>
+
+<script type="text/javascript">
+
+    var api2_call = {
+            "cpanel_jsonapi_version" : 2,
+            "cpanel_jsonapi_module" : "RepositoryManager",
+    };
+
+    function fetchWant () {
+        var from = YAHOO.util.Dom.get("from");
+        if ( from.value == "tag" ) {
+            api2_call.cpanel_jsonapi_func = "taglist";
+            make_api2_call();
+        } else if ( from.value == "branch" ) {
+            api2_call.cpanel_jsonapi_func = "branchlist";
+            make_api2_call();
+        } else if ( from.value == "commit" ) {
+            var want_container = YAHOO.util.Dom.get("want");
+            want_container.innerHTML = '';
+            var commit_input = document.createElement('input');
+            commit_input.type = 'text';
+            commit_input.name = 'want';
+            commit_input.size = 8;
+            want_container.appendChild(commit_input);
+        }
+    }
+
+    function make_api2_call () {
+        api2_call.repo_name = YAHOO.util.Dom.get("repo_name").value;
+        YAHOO.util.Dom.get("want").innerHTML = CPANEL.icons.ajax + " loading...";
+        YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_call), callback, '');
+    }
+
+    var callback = {
+        success : function(o) {
+            try {
+                var data = YAHOO.lang.JSON.parse(o.responseText);
+            }
+            catch(e) {
+                alert(e);
+            }
+            if ( data.cpanelresult.event.result == "1" ) {
+                var want_container = YAHOO.util.Dom.get("want");
+                want_container.innerHTML = '';
+                var select = document.createElement('select');
+                select.name = 'want';
+                for ( i = 0, l = data.cpanelresult.data.length; i < l; ++i ) {
+                    var option = document.createElement('option');
+                    var value = data.cpanelresult.data[i].tag || data.cpanelresult.data[i].branch;
+                    option.innerHTML = value;
+                    option.value = value;
+                    select.appendChild(option);
+                }
+                want_container.appendChild(select);
+            } else {
+                alert(data.cpanelresult.event.reason);
+            }
+        },
+        failure : function(o) { }
+    };
+    YAHOO.util.Event.addListener( [ "from", "repo_name" ], "change", fetchWant );
+
+</script>
+
+<div class="body-content">
+
+    <div class="h1Title">
+        <div class="spriteicon_img_mini" id="icon-repositorymanager_mini"></div>
+        Checkout
+    </div>
+
+    <p class="description">Checkout allows you to create instance of a local repository at a specific tag, commit or branch.</p>
+
+    <form method="post" action="docheckout.html">
+        From
+        <select name="repo_name" id="repo_name">
+            <?cp RepositoryManager::repo_list([option value="%"]%[/option],repo_name,repo_name) ?>
+        </select>
+        checkout
+        <select name="from" id="from">
+            <option value="branch">branch</option>
+            <option value="commit">commit</option>
+            <option value="tag">tag</option>
+        </select>
+        <span id="want"></span>
+        into <cpanel print="$homedir">/sites/
+        <input type="text" name="clone_dir"/>
+        <p><input type="submit" class="input-button" value="Checkout"/></p>
+    </form>
+    <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>    
+    <!-- for some reason YAHOO.util.Event.onDOMReady does not work. check this later -->
+    <script type="text/javascript">fetchWant();</script>
+</div>
+
+<cpanel Branding="include(stdfooter.html)">

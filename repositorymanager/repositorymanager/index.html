@@ -61,9 +61,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     </div>
 
     <!-- checkouts -->
-    <div>
+    <div style="float:right;width:67%;">
         <div class="h2Title">Checkouts</div>
         <p><a href="repo/checkout.html">Add</a></p>
+        <?cp RepositoryManager::checkout_list(% in % at %[br],cloned_from,repo_name,checkout_name) ?>
     </div>
 
     <!-- updates -->

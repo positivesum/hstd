@@ -3,7 +3,6 @@ package Cpanel::RepositoryManager;
 use strict;
 use warnings;
 use File::Path;
-use Git;
 
 =head1 NAME
 
@@ -44,6 +43,30 @@ sub api2 {
             func   => 'api2_clone_remote',
             engine => 'hasharray',
         },
+        clone_local => {
+            func   => 'api2_clone_local',
+            engine => 'hasharray',
+        },
+        taglist => {
+            func   => 'api2_taglist',
+            engine => 'hasharray'
+        },
+        branchlist => {
+            func   => 'api2_branchlist',
+            engine => 'hasharray',
+        },
+        getstate => {
+            func   => 'api2_getstate',
+            engine => 'hasharray',
+        },
+        checkout => {
+            func   => 'api2_checkout',
+            engine => 'hasharray',
+        },
+        checkout_list => {
+            func   => 'api2_checkout_list',
+            engine => 'hasharray',
+        }
     };
     return ( \%{ $API->{$func} } );
 }
@@ -130,11 +153,12 @@ sub git_log {
             timestamp => $2,
             subject   => $3,
         };
-
     } `git --git-dir=$repo_path/.git log --pretty=format:'%h %ct %s'`;
 }
 
 =head2 api2_init
+
+Init empty repository
 
 Parameters:
 
@@ -219,6 +243,151 @@ sub repo_type {
     my $repo_path = repo_path(shift);
     return "git" if -d $repo_path . "/.git";
     return "hg"  if -d $repo_path . "/.hg";
+}
+
+=head2 api2_clone_local
+
+Clone local repository into ~/sites/cloned_repo
+
+Params:
+
+    repo_name (string) - repository name
+    clone_dir (string) - cloned repository path
+
+Returns:
+
+    <data>
+        <output>Command output</output>
+    </data>
+
+=cut
+
+sub api2_clone_local {
+    my %OPTS      = @_;
+    my $repo_path = repo_path( $OPTS{'repo_name'} );
+    my $clone_dir = repo_path( $OPTS{'clone_dir'} );
+    if ( repo_type( $OPTS{'repo_name'} ) eq 'git' ) {
+        my $output = `git clone $repo_path $clone_dir 2>&1`;
+        return { output => $output };
+    }
+}
+
+=head2 api2_taglist
+
+List available tags
+
+Parameters:
+
+    repo_name (string) - repository name
+
+Returns:
+
+    <data>
+        <tag>Tag</tag>
+    </data>
+
+=cut
+
+sub api2_taglist {
+    my %OPTS      = @_;
+    my $repo_path = repo_path( $OPTS{'repo_name'} );
+    my $repo_type = repo_type( $OPTS{'repo_name'} );
+    return map { chomp; { tag => $_ } } `git --git-dir=$repo_path/.git tag` if $repo_type eq 'git';
+}
+
+=head2 api2_branchlist
+
+List repository branches
+
+Parameters:
+
+    repo_name (string) - repository name
+
+Returns:
+
+    <data>
+        <branch>Branch</branch>
+    </data>
+
+=cut
+
+sub api2_branchlist {
+    my %OPTS      = @_;
+    my $repo_path = repo_path( $OPTS{'repo_name'} );
+    my $repo_type = repo_type( $OPTS{'repo_name'} );
+    return map { chomp; s/^..//; { branch => $_ } } `git --git-dir=$repo_path/.git branch` if $repo_type eq 'git';
+}
+
+=head2 api2_checkout
+
+Checkout repository to specific tag,branch or revision
+
+Parameters:
+
+    repo_name (string) - repository name
+    want (string) - what to checkout (tag/branch/commit)
+
+Returns:
+
+    <data>
+        <output>Command output</output>
+    </data>
+
+=cut
+
+sub api2_checkout {
+    my %OPTS      = @_;
+    my $repo_type = repo_type( $OPTS{'repo_name'} );
+    my $repo_path = repo_path( $OPTS{'repo_name'} );
+    open my $fh, ">$repo_path/.checkout";
+    $OPTS{'want'} = substr $OPTS{'want'}, 0, 7 if $OPTS{'checkout_type'} eq 'commit';
+    print $fh "[checkout]\ntype=$OPTS{'checkout_type'}\nname=$OPTS{'want'}";
+    close $fh;
+    return { output => `git --work-tree=$repo_path --git-dir=$repo_path/.git checkout $OPTS{'want'} 2>&1` }
+        if $repo_type eq 'git';
+}
+
+=head2 api2_checkout_list
+
+List checkouted repositories
+
+Returns:
+
+    <data>
+        <cloned_from>Repo origin</cloned_from>
+        <repo_name>Cloned repository name</repo_name>
+        <checkout_name>Tag,branch or commit</checkout_name>
+    </data>
+
+=cut
+
+sub api2_checkout_list {
+    my %OPTS = @_;
+    my @RSD;
+
+    # read ~/sites
+    opendir my $dh, repo_path("../sites");
+    my @repos = grep { !/^\./ } readdir $dh;
+    closedir $dh;
+    return if not @repos;
+
+    foreach my $repo_name (@repos) {
+
+        # use Config::Any for this
+        my $repo_path = repo_path("../sites/$repo_name");
+        open my $fh, "<$repo_path/.checkout";
+        my @lines = <$fh>;
+        close $fh;
+
+        my ($checkout_name) = grep { /name=/ } @lines;
+        map { s/.*=// } ($checkout_name);
+
+        `git --git-dir=$repo_path/.git remote show origin 2>&1` =~ /Fetch URL: .*\b\/(.*)/;
+
+        push @RSD, { cloned_from => $1, repo_name => $repo_name, checkout_name => $checkout_name };
+
+    }
+    return @RSD;
 }
 
 =head1 AUTHOR

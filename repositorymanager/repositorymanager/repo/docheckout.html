@@ -48,8 +48,17 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
     function clone ( obj ) { return YAHOO.lang.JSON.parse( YAHOO.lang.JSON.stringify( obj ) ); }
 
+    var api2_call = {
+        "cpanel_jsonapi_version" : 2,
+        "cpanel_jsonapi_module" : "RepositoryManager",
+        "cpanel_jsonapi_func" : "clone_local",
+        "repo_name" : "<cpanel print="$FORM{'repo_name'}">",
+        "clone_dir" : "../sites/<cpanel print="$FORM{'clone_dir'}">",
+    };
+
+    
     var callback = {
-        success : function(o) {
+        success: function (o) {
             var module_output = YAHOO.util.Dom.get("module-output");
             try {
                 var data = YAHOO.lang.JSON.parse(o.responseText);
@@ -59,52 +68,34 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
                 return;
             }
             if ( data.cpanelresult.event.result == "1" ) {
-                module_output.innerHTML = "<pre>" + data.cpanelresult.data[0].output + "</pre>";
+                module_output.innerHTML = module_output.innerHTML + "<pre>" + data.cpanelresult.data[0].output + "</pre>";
             } else {
                 module_output.innerHTML = data.cpanelresult.event.reason;
             }
         },
-        failure : function(o) { }
+        customevents : {
+            // run second request right after first. checkout
+            onSuccess : function () {
+                callback.customevents = '';
+                api2_call.cpanel_jsonapi_func = "checkout";
+                api2_call.repo_name = "../sites/<cpanel print="$FORM{'clone_dir'}">";
+                api2_call.want = "<cpanel print="$FORM{'want'}">";
+                api2_call.checkout_type = "<cpanel print="$FORM{'from'}">";
+                YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_call), callback, '');
+            }
+        }
     };
-
-    var api2_base = {
-        "cpanel_jsonapi_version" : 2,
-        "cpanel_jsonapi_module" : "RepositoryManager",
-    };
-
-    <cpanelif $FORM{'repo_source'}=='remote'>
-        var api2_clone_remote = clone(api2_base);
-        api2_clone_remote.cpanel_jsonapi_func = "clone_remote";
-        api2_clone_remote.repo_type = "<cpanel print="$FORM{'remote_type'}">"
-        api2_clone_remote.repo_url =  "<cpanel print="$FORM{'remote_url'}">";
-
-        YAHOO.util.Event.onDOMReady(
-            YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_clone_remote), callback, '' )
-        );
-    </cpanelif>
-
-    <cpanelif $FORM{'repo_source'}=='local'>
-        var api2_init = clone(api2_base);
-        api2_init.cpanel_jsonapi_func = "init";
-        api2_init.repo_type = "<cpanel print="$FORM{'local_type'}">";
-        api2_init.repo_name = "<cpanel print="$FORM{'local_name'}">";
-        YAHOO.util.Event.onDOMReady(
-            YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_init), callback, '' )
-        );
-    </cpanelif>
-
+    // clone
+    YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_call), callback, '');
 </script>
 
 <div class="body-content">
-
     <div class="h1Title">
         <div class="spriteicon_img_mini" id="icon-repositorymanager_mini"></div>
-        Add repository
+        Checkout
     </div>
-
     <div id="module-output"></div>
-
-    <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>
+    <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>    
 </div>
 
 <cpanel Branding="include(stdfooter.html)">
