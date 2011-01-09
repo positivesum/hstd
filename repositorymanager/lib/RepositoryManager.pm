@@ -235,13 +235,18 @@ Returns:
 
 sub api2_clone_remote {
     my %OPTS = @_;
+    my $output;
+    my @parts = split /\//, $OPTS{'repo_url'};
     if ( $OPTS{'repo_type'} eq 'git' ) {
-        my @parts = split /\//, $OPTS{'repo_url'};
         $parts[-1] =~ s/\.git$//;
         my $repo_path = repo_path( $parts[-1] );
-        my $output    = `git clone $OPTS{'repo_url'} $repo_path 2>&1`;
-        return { output => $output };
+        $output = `git clone $OPTS{'repo_url'} $repo_path 2>&1`;
     }
+    elsif ( $OPTS{'repo_type'} eq 'hg' ) {
+        my $repo_path = repo_path( $parts[-1] );
+        $output = `hg clone $OPTS{'repo_url'} $repo_path 2>&1`;
+    }
+    return { output => $output };
 }
 
 =head2 repo_path
