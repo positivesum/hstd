@@ -326,6 +326,7 @@ sub api2_taglist {
     my $repo_path = repo_path( $OPTS{'repo_name'} );
     my $repo_type = repo_type( $OPTS{'repo_name'} );
     return map { chomp; { tag => $_ } } `git --git-dir=$repo_path/.git tag` if $repo_type eq 'git';
+    return map { chomp; s/ .*//; { tag => $_ } } `hg --cwd $repo_path tags` if $repo_type eq 'hg';
 }
 
 =head2 api2_branchlist
@@ -422,7 +423,7 @@ sub api2_checkout_list {
 
         # [git] will not work if parent repository was moved/deleted. add some magic later
         `git --git-dir=$repo_path/.git remote show origin 2>&1` =~ /Fetch URL: .*\b\/(.*)/ if $repo_type eq 'git';
-        `hg --cwd $repo_path paths 2>&1` =~ /= .*\b\/(.*)/ if $repo_type eq 'hg';
+        `hg --cwd $repo_path paths 2>&1`                        =~ /= .*\b\/(.*)/          if $repo_type eq 'hg';
         push @RSD, { cloned_from => $1, repo_name => $repo_name, checkout_name => $checkout_name };
 
     }
