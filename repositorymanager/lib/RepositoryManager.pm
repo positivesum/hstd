@@ -301,7 +301,7 @@ sub api2_clone_local {
     my $repo_type = repo_type( $OPTS{'repo_name'} );
     my $output;
     $output = `git clone $repo_path $clone_dir 2>&1` if $repo_type eq 'git';
-    $output = `hg clone $repo_path $clone_dir 2>&1` if $repo_type eq 'hg';
+    $output = `hg clone $repo_path $clone_dir 2>&1`  if $repo_type eq 'hg';
     return { output => $output };
 }
 
@@ -349,6 +349,7 @@ sub api2_branchlist {
     my $repo_path = repo_path( $OPTS{'repo_name'} );
     my $repo_type = repo_type( $OPTS{'repo_name'} );
     return map { chomp; s/^..//; { branch => $_ } } `git --git-dir=$repo_path/.git branch` if $repo_type eq 'git';
+    return map { chomp; s/ .*//; { branch => $_ } } `hg --cwd $repo_path branches`         if $repo_type eq 'hg';
 }
 
 =head2 api2_checkout
