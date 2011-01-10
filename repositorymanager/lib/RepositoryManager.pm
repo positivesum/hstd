@@ -298,10 +298,11 @@ sub api2_clone_local {
     my %OPTS      = @_;
     my $repo_path = repo_path( $OPTS{'repo_name'} );
     my $clone_dir = repo_path( $OPTS{'clone_dir'} );
-    if ( repo_type( $OPTS{'repo_name'} ) eq 'git' ) {
-        my $output = `git clone $repo_path $clone_dir 2>&1`;
-        return { output => $output };
-    }
+    my $repo_type = repo_type( $OPTS{'repo_name'} );
+    my $output;
+    $output = `git clone $repo_path $clone_dir 2>&1` if $repo_type eq 'git';
+    $output = `hg clone $repo_path $clone_dir 2>&1` if $repo_type eq 'hg';
+    return { output => $output };
 }
 
 =head2 api2_taglist
@@ -371,12 +372,16 @@ sub api2_checkout {
     my %OPTS      = @_;
     my $repo_type = repo_type( $OPTS{'repo_name'} );
     my $repo_path = repo_path( $OPTS{'repo_name'} );
+
     open my $fh, ">$repo_path/.checkout";
     $OPTS{'want'} = substr $OPTS{'want'}, 0, 7 if $OPTS{'checkout_type'} eq 'commit';
     print $fh "[checkout]\ntype=$OPTS{'checkout_type'}\nname=$OPTS{'want'}";
     close $fh;
-    return { output => `git --work-tree=$repo_path --git-dir=$repo_path/.git checkout $OPTS{'want'} 2>&1` }
-        if $repo_type eq 'git';
+
+    my $output;
+    $output = `git --work-tree=$repo_path --git-dir=$repo_path/.git checkout $OPTS{'want'} 2>&1` if $repo_type eq 'git';
+    $output = `hg --cwd $repo_path checkout $OPTS{'want'} 2>&1` if $repo_type eq 'hg';
+    return { output => $output };
 }
 
 =head2 api2_checkout_list
