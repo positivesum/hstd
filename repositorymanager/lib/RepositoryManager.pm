@@ -418,8 +418,11 @@ sub api2_checkout_list {
         map { s/.*=// } ($checkout_name);
         close $fh;
 
-        # will not work if parent repository was moved/deleted. add some magic later
-        `git --git-dir=$repo_path/.git remote show origin 2>&1` =~ /Fetch URL: .*\b\/(.*)/;
+        my $repo_type = repo_type("../sites/$repo_name");
+
+        # [git] will not work if parent repository was moved/deleted. add some magic later
+        `git --git-dir=$repo_path/.git remote show origin 2>&1` =~ /Fetch URL: .*\b\/(.*)/ if $repo_type eq 'git';
+        `hg --cwd $repo_path paths 2>&1` =~ /= .*\b\/(.*)/ if $repo_type eq 'hg';
         push @RSD, { cloned_from => $1, repo_name => $repo_name, checkout_name => $checkout_name };
 
     }
