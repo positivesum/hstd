@@ -273,8 +273,22 @@ Return repository type
 
 sub repo_type {
     my $repo_path = repo_path(shift);
-    return "git" if -d $repo_path . "/.git";
+    return "git" if -d $repo_path . "/.git" or is_gitbare($repo_path);
     return "hg"  if -d $repo_path . "/.hg";
+}
+
+=head2 is_gitbare
+
+Check if repo is git bare
+
+=cut
+
+sub is_gitbare {
+    my $repo_path = shift;
+    open my $fh, "<$repo_path/config" or return;
+    my $res = grep { /bare = true/ } <$fh>;
+    close $fh;
+    return $res;
 }
 
 =head2 api2_clone_local
