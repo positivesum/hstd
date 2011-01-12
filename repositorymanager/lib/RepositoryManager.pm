@@ -141,7 +141,6 @@ Get Git log and prepare desired output
 sub git_log {
     my $repo_name = shift;
     my $repo_path = repo_path($repo_name);
-    return if not -d "$repo_path/.git/logs";
     return map {
         /^'?(\S{7}) (\d{10}) (.*)'?$/;
         {
@@ -150,7 +149,7 @@ sub git_log {
             timestamp => $2,
             subject   => $3,
         };
-    } `git --git-dir=$repo_path/.git log -n 20 --pretty=format:'%h %ct %s'`;
+    } `git --git-dir=$repo_path log -n 20 --pretty=format:'%h %ct %s'`;
 }
 
 =head2 hg_log
@@ -195,7 +194,7 @@ sub api2_init {
     my $repo_path = repo_path( $OPTS{'repo_name'} );
     my $output;
     if ( $OPTS{'repo_type'} eq 'git' ) {
-        $output = `git init $repo_path 2>&1`;
+        $output = `git init --bare $repo_path 2>&1`;
     }
     elsif ( $OPTS{'repo_type'} eq 'hg' ) {
         $output = `hg init $repo_path 2>&1`;
@@ -242,11 +241,11 @@ sub api2_clone_remote {
     if ( $OPTS{'repo_type'} eq 'git' ) {
         $parts[-1] =~ s/\.git$//;
         my $repo_path = repo_path( $parts[-1] );
-        $output = `git clone $OPTS{'repo_url'} $repo_path 2>&1`;
+        $output = `git clone --bare $OPTS{'repo_url'} $repo_path 2>&1`;
     }
     elsif ( $OPTS{'repo_type'} eq 'hg' ) {
         my $repo_path = repo_path( $parts[-1] );
-        $output = `hg clone $OPTS{'repo_url'} $repo_path 2>&1`;
+        $output = `hg clone -U $OPTS{'repo_url'} $repo_path 2>&1`;
     }
     return { output => $output };
 }
@@ -335,7 +334,7 @@ sub api2_taglist {
     my %OPTS      = @_;
     my $repo_path = repo_path( $OPTS{'repo_name'} );
     my $repo_type = repo_type( $OPTS{'repo_name'} );
-    return map { chomp; { tag => $_ } } `git --git-dir=$repo_path/.git tag` if $repo_type eq 'git';
+    return map { chomp; { tag => $_ } } `git --git-dir=$repo_path tag` if $repo_type eq 'git';
     return map { chomp; s/ .*//; { tag => $_ } } `hg --cwd $repo_path tags` if $repo_type eq 'hg';
 }
 
@@ -359,7 +358,7 @@ sub api2_branchlist {
     my %OPTS      = @_;
     my $repo_path = repo_path( $OPTS{'repo_name'} );
     my $repo_type = repo_type( $OPTS{'repo_name'} );
-    return map { chomp; s/^..//; { branch => $_ } } `git --git-dir=$repo_path/.git branch` if $repo_type eq 'git';
+    return map { chomp; s/^..//; { branch => $_ } } `git --git-dir=$repo_path branch` if $repo_type eq 'git';
     return map { chomp; s/ .*//; { branch => $_ } } `hg --cwd $repo_path branches`         if $repo_type eq 'hg';
 }
 
@@ -439,6 +438,14 @@ sub api2_checkout_list {
     }
     return @RSD;
 }
+
+=head1 TODO
+
+For now everything except api2_checkout and api2_checkout_list are
+used to work with bare repos only. Add boolean "bare" parameter to
+all api2 functions.
+
+Do something smart to handle warnings on empty repo in git_log
 
 =head1 AUTHOR
 
