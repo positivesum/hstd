@@ -102,11 +102,7 @@ sub repo_list {
 
     my @repo_list;
     foreach my $repo_name (@repos) {
-        my $repo_type;
-        my $repo_path = repo_path($repo_name);
-        $repo_type = 'git' if -d $repo_path . "/.git";    # ugly. change this
-        $repo_type = 'hg'  if -d $repo_path . "/.hg";
-        push @repo_list, { repo_name => $repo_name, repo_type => $repo_type };
+        push @repo_list, { repo_name => $repo_name, repo_type => repo_type($repo_name) };
     }
     return @repo_list;
 }
@@ -274,7 +270,7 @@ Return repository type
 sub repo_type {
     my $repo_path = repo_path(shift);
     return "git" if -d $repo_path . "/.git" or is_gitbare($repo_path);
-    return "hg"  if -d $repo_path . "/.hg";
+    return "hg" if -d $repo_path . "/.hg";
 }
 
 =head2 is_gitbare
