@@ -73,14 +73,84 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     };
 
     <cpanelif $FORM{'repo_source'}=='remote'>
+
+        var url     = "<cpanel print="$FORM{'remote_url'}">";
+        var re      = new RegExp("^(git|https?|ftps?|rsync)://");
+        var rematch = new RegExp("(.*@|:.*)","g");
+        var host    = url.replace(rematch,'');
+
         var api2_clone_remote = clone(api2_base);
         api2_clone_remote.cpanel_jsonapi_func = "clone_remote";
         api2_clone_remote.repo_type = "<cpanel print="$FORM{'remote_type'}">"
         api2_clone_remote.repo_url =  "<cpanel print="$FORM{'remote_url'}">";
 
-        YAHOO.util.Event.onDOMReady(
+        var api2_is_known = {
+            "cpanel_jsonapi_version" : 2,
+            "cpanel_jsonapi_module" : "SSHKnownHosts",
+            "cpanel_jsonapi_func" : "is_known",
+            "host" : host,
+        };
+
+        var api2_add_host = {
+            "cpanel_jsonapi_version" : 2,
+            "cpanel_jsonapi_module" : "SSHKnownHosts",
+            "cpanel_jsonapi_func" : "add_host",
+            "type" : "rsa",
+            "host" : host,
+        };
+
+        var add_host_callback = {
+            success : function(o) {
+                try {
+                    var data = YAHOO.lang.JSON.parse(o.responseText);
+                }
+                catch(e) {
+                    alert(e);
+                    return;
+                }
+                if ( data.cpanelresult.event.result == "1" ) {
+                    YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_clone_remote), callback, '' );
+                }
+                else {
+                    alert( data.cpanelresult.event.reason );
+                }
+            }
+        };
+
+        var is_known_callback = {
+            success : function(o) {
+                try {
+                    var data = YAHOO.lang.JSON.parse(o.responseText);
+                }
+                catch(e) {
+                    alert(e);
+                    return;
+                }
+                if ( data.cpanelresult.event.result == "1" ) {
+                    if ( data.cpanelresult.data[0].is_known == "1" ) {
+                        YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_clone_remote), callback, '' );
+                    }else {
+                        var res = confirm("The authenticity of host "+ host + " can't be established.\nAre you sure you want to continue?");
+                        if (res) {
+                            YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_add_host), add_host_callback, '' );
+                        }
+                        else {
+                            YAHOO.util.Dom.get("module-output").innerHTML = 'Host key verification failed.';
+                        }
+                    }
+                }
+                else {
+                    alert( data.cpanelresult.event.reason );
+                }
+            }
+        };
+
+        if (url.match(re)) {
             YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_clone_remote), callback, '' )
-        );
+        } else {
+            YAHOO.util.Connect.asyncRequest('GET', CPANEL.urls.json_api(api2_is_known), is_known_callback, '');
+        }
+        
     </cpanelif>
 
     <cpanelif $FORM{'repo_source'}=='local'>
