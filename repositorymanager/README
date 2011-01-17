@@ -1,0 +1,24 @@
+Installation
+------------
+It is possible to install Git and Hg automatically
+
+    perl install.pl [--install-git] [--install-hg]
+
+Manual installation
+-------------------
+To install Git we need to add EPEL repository
+
+    rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+
+And then install git
+
+    yum --disableexcludes=all install git -y
+
+cPanel keeps own copy of Perl. The default install adds exclude rule for "perl*"
+in /etc/yum.conf so we are going to bypass this with --disableexcludes=all
+
+For Hg installation execute
+
+    yum install mercurial -y
+
+Same things are done by install.pl script.

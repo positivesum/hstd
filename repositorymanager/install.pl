@@ -25,6 +25,16 @@ if ( $< != 0 ) {
     exit;
 }
 
+foreach (@ARGV) {
+    if ( $_ eq '--install-git' ) {
+        system('rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm');
+        system('yum --disableexcludes=all install git -y');
+    }
+    if ($_ eq '--install-hg' ) {
+        system('yum install mercurial -y');
+    }
+}
+
 my $CPANEL = "/usr/local/cpanel";
 
 `cp -r $Bin/repositorymanager $CPANEL/base/frontend/x3`;
