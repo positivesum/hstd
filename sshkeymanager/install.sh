@@ -1,7 +1,7 @@
-#!/usr/bin/env perl
+#!/bin/bash
 
 # HSTD SSH Key Manager
-# Copyright (C) 2010 HSTD.org
+# Copyright (C) 2010-2011 HSTD.org
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,18 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-use strict;
-use warnings;
-use FindBin qw($Bin);
+if [ `whoami` != 'root' ]; then
+    echo "This script must be run as root."; exit 0
+fi
 
-if ( $< != 0 ) {
-    print "This script must be run as root.";
-    exit;
-}
+CPANEL=/usr/local/cpanel
 
-my $CPANEL = "/usr/local/cpanel";
-
-`cp -r $Bin/sshkeymanager $CPANEL/base/frontend/x3`;
-`cp $Bin/sshkeymanager.cpanelplugin $CPANEL/bin`;
-`cp $Bin/lib/* $CPANEL/Cpanel`;
-`$CPANEL/bin/register_cpanelplugin $CPANEL/bin/sshkeymanager.cpanelplugin`;
+cp -r ./sshkeymanager $CPANEL/base/frontend/x3
+cp ./lib/* $CPANEL/Cpanel
+cp ./sshkeymanager.cpanelplugin $CPANEL/bin
+$CPANEL/bin/register_cpanelplugin $CPANEL/bin/sshkeymanager.cpanelplugin
