@@ -4,6 +4,28 @@ use strict;
 use warnings;
 use Cpanel::SSH;
 
+sub api2 {
+    my $func = shift;
+    my $API  = {
+        fetchkey => {
+            func   => 'api2_fetchkey',
+            engine => 'hasharray',
+        },
+    };
+    return ( \%{ $API->{$func} } );
+}
+
+
+sub api2_fetchkey {
+    my @RSD = Cpanel::SSH::api2_fetchkey(@_);
+    return unless $RSD[0]{key};
+    return @RSD;
+}
+
+1;
+
+__END__
+
 =head1 NAME
 
 Cpanel::SSHKeyManager - additional hooks for sshkeymanager
@@ -22,30 +44,9 @@ on how the module works.
 
 See cpanel dev docs: Writing cPanel Modules/Creating API2 Calls
 
-=cut
-
-sub api2 {
-    my $func = shift;
-    my $API  = {
-        fetchkey => {
-            func   => 'api2_fetchkey',
-            engine => 'hasharray',
-        },
-    };
-    return ( \%{ $API->{$func} } );
-}
-
 =head2 api2_fetchkey
 
-Small workaround for original SSH::api2_fetchkey. Needed to support || operator.
-
-=cut
-
-sub api2_fetchkey {
-    my @RSD = Cpanel::SSH::api2_fetchkey(@_);
-    return if not defined $RSD[0]{key};
-    return @RSD;
-}
+Small workaround for original SSH::fetchkey. Needed to support || operator.
 
 =head1 AUTHOR
 
@@ -55,7 +56,7 @@ Produced by Taras Mankovski <taras@positivesum.ca>
 
 =head1 COPYRIGHT
 
-HSTD SSH Key Manager. Copyright (C) 2010 HSTD.org
+HSTD SSH Key Manager. Copyright (C) 2010-2011 HSTD.org
 
 =head1 LICENCE
 
@@ -73,5 +74,3 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 =cut
-
-1;
