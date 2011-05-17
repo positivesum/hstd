@@ -2,7 +2,6 @@ package Cpanel::SSHAuthorizedKeys;
 
 use strict;
 use warnings;
-use Cpanel::PwCache;
 
 sub api2 {
     my $func = shift;
@@ -25,9 +24,9 @@ sub api2 {
 
 sub api2_listkeys {
     my @RSD;
-    open my $fh, authkeys_file();
+    open my $fh, '<', authkeys_file();
     while (<$fh>) {
-        my @parts = split / /;
+        my @parts = split /\s/;
         push @RSD, { type => $parts[0], key => $parts[1], user => $parts[2] };
     }
     close $fh;
@@ -36,27 +35,24 @@ sub api2_listkeys {
 
 sub api2_importkey {
     my %OPTS = @_;
-    my $key  = $OPTS{'key'};
-    $key =~ s/^\s+//;
-    $key =~ s/\s+$//;
-    $key =~ s/\n//g;
+    $OPTS{key} =~ s/^\s+|\s+$|\n//g;
     open my $fh, '>>', authkeys_file();
-    print $fh $key, "\n";
+    print $fh $OPTS{key}, "\n";
     close $fh;
 }
 
 sub api2_delkey {
     my %OPTS = @_;
-    open my $fh, '<', authkeys_file();
-    my @lines = <$fh>;
-    close $fh;
-    @lines = grep { !/\s$OPTS{'user'}$/ } @lines;
-    open $fh, '>', authkeys_file();
+    open my $fh, '+<', authkeys_file();
+    my @lines = grep { !/\s$OPTS{user}$/ } <$fh>;
+    seek $fh, 0, 0;
+    truncate $fh, 0;
     print $fh @lines;
     close $fh;
 }
 
 sub authkeys_file {
+    use Cpanel::PwCache;
     return Cpanel::PwCache::gethomedir() . "/.ssh/authorized_keys";
 }
 
@@ -138,3 +134,5 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+=cut
