@@ -4,26 +4,6 @@ use strict;
 use warnings;
 use Cpanel::PwCache;
 
-=head1 NAME
-
-Cpanel::SSHAuthorizedKeys - manage ~/.ssh/authorized_keys
-
-=head1 DESCRIPTION
-
-This modules used for authorized keys management. Used by sshkeymanager.
-
-=head1 METHODS
-
-=head2 api2
-
-This function specifies which API2 calls are mapped to which functions.
-It is also responsible for returning a hash that contains information
-on how the module works.
-
-See cpanel dev docs: Writing cPanel Modules/Creating API2 Calls
-
-=cut
-
 sub api2 {
     my $func = shift;
     my $API  = {
@@ -43,20 +23,6 @@ sub api2 {
     return ( \%{ $API->{$func} } );
 }
 
-=head2 api2_listkeys
-
-List all keys from ~/.ssh/authorized_keys
-
-Returns:
-
-    <data>
-        <type>Key type. Ex: ssh-rsa</type>
-        <key>Key hash</key>
-        <user>user@host</user>
-    </data>
-
-=cut
-
 sub api2_listkeys {
     my @RSD;
     open my $fh, authkeys_file();
@@ -67,16 +33,6 @@ sub api2_listkeys {
     close $fh;
     return @RSD;
 }
-
-=head2 api2_importkey
-
-Import public key to ~/.ssh/authorized_keys
-
-Parameters:
-
-    key (string) - SSH public key
-
-=cut
 
 sub api2_importkey {
     my %OPTS = @_;
@@ -89,16 +45,6 @@ sub api2_importkey {
     close $fh;
 }
 
-=head2 api2_delkey
-
-Delete public key from ~/.ssh/authorized_keys
-
-Parameters:
-
-    user (string) - Key's user@hostname string. All matching keys will be deleted.
-
-=cut
-
 sub api2_delkey {
     my %OPTS = @_;
     open my $fh, '<', authkeys_file();
@@ -110,15 +56,63 @@ sub api2_delkey {
     close $fh;
 }
 
-=head2 authkeys_file
-
-Get full path of ~/.ssh/authorized_keys
-
-=cut
-
 sub authkeys_file {
     return Cpanel::PwCache::gethomedir() . "/.ssh/authorized_keys";
 }
+
+1;
+
+__END__
+
+=head1 NAME
+
+Cpanel::SSHAuthorizedKeys - manage ~/.ssh/authorized_keys
+
+=head1 DESCRIPTION
+
+This modules used for authorized keys management. Used by sshkeymanager.
+
+=head1 METHODS
+
+=head2 api2
+
+This function specifies which API2 calls are mapped to which functions.
+It is also responsible for returning a hash that contains information
+on how the module works.
+
+See cpanel dev docs: Writing cPanel Modules/Creating API2 Calls
+
+=head2 api2_listkeys
+
+List all keys from ~/.ssh/authorized_keys
+
+Returns:
+
+    <data>
+        <type>Key type. Ex: ssh-rsa</type>
+        <key>Key hash</key>
+        <user>user@host</user>
+    </data>
+
+=head2 api2_importkey
+
+Import public key to ~/.ssh/authorized_keys
+
+Parameters:
+
+    key (string) - SSH public key
+
+=head2 api2_delkey
+
+Delete public key from ~/.ssh/authorized_keys
+
+Parameters:
+
+    user (string) - Key's user@hostname string. All matching keys will be deleted.
+
+=head2 authkeys_file
+
+Get full path of ~/.ssh/authorized_keys
 
 =head1 AUTHOR
 
@@ -128,7 +122,7 @@ Produced by Taras Mankovski <taras@positivesum.ca>
 
 =head1 COPYRIGHT
 
-HSTD SSH Key Manager. Copyright (C) 2010 HSTD.org
+HSTD SSH Key Manager. Copyright (C) 2010-2011 HSTD.org
 
 =head1 LICENCE
 
@@ -144,7 +138,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-=cut
-
-1;
