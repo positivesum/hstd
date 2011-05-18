@@ -50,8 +50,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
         <div class="spriteicon_img_mini" id="icon-sshkeymanager_mini"></div>
         Add authorized key
     </div>
-    <?cp SSHAuthorizedKeys::importkey(,) key=$FORM{'key'} ?>        
-    Key added
+    <?cp SSHAuthorizedKeys::importkey(%,status_msg) key=$FORM{'key'} ?>
     <div class="return-link"><a href="../index.html">&larr; Go Back</a></div>
     
 </div>

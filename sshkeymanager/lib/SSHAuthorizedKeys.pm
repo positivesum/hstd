@@ -35,10 +35,16 @@ sub api2_listkeys {
 
 sub api2_importkey {
     my %OPTS = @_;
+
     $OPTS{key} =~ s/^\s+|\s+$|\n//g;
+    return { status_msg => 'The key is invalid', status => 0 }
+      unless $OPTS{key} =~ m/^(ssh-rsa|ssh-dss)\s[a-zA-Z0-9\/\+=]+?\s\S+$/;
+
     open my $fh, '>>', authkeys_file();
     print $fh $OPTS{key}, "\n";
     close $fh;
+
+    return { status_msg => 'Key added', status => 1 };
 }
 
 sub api2_delkey {
@@ -97,6 +103,13 @@ Import public key to ~/.ssh/authorized_keys
 Parameters:
 
     key (string) - SSH public key
+
+Returns:
+
+    <data>
+        <status>Bool value. '1' if successful. '0' if failed.</status>
+        <status_msg>A string that contains a success message or reason for failure.</status_msg>
+    </data>
 
 =head2 api2_delkey
 

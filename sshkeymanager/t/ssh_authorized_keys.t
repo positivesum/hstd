@@ -44,23 +44,29 @@ ok( $authkeys_file, 'path to authorized_keys' );
 
 # api2_importkey
 {
-    open my $fh, '>', $authkeys_file;
-    truncate $fh, 0;
-    close $fh;
+
+    # try to import invalid key
+    unlink $authkeys_file;
+    my $res_wrong_key = Cpanel::SSHAuthorizedKeys::api2_importkey( 'key', 'hurr durr' );
+    ok( !-e $authkeys_file,            'invalid key: importkey' );
+    ok( $res_wrong_key->{status} == 0, 'invalid key: import status 0' );
+    ok( $res_wrong_key->{status_msg},  'invalid key: import status_msg defined' );
+    unlink $authkeys_file;    # just in case something goes wrong
 
     # We need to test this regex: s/^\s+|\s+$|\n//g
     # so let's add some garbage to keys
     my $garbage_key = " \n   \n  $rsa_key   \n\n";
+    my $res_garbage = Cpanel::SSHAuthorizedKeys::api2_importkey( 'key', $garbage_key );
+    my $res_dsa     = Cpanel::SSHAuthorizedKeys::api2_importkey( 'key', $dsa_key );
 
-    Cpanel::SSHAuthorizedKeys::api2_importkey( 'key', $garbage_key );
-    Cpanel::SSHAuthorizedKeys::api2_importkey( 'key', $dsa_key );
-
-    open $fh, '<', $authkeys_file;
+    open my $fh, '<', $authkeys_file;
     my $got = join '', <$fh>;
     close $fh;
 
     my $expected = $rsa_key . $dsa_key;
-    ok( $got eq $expected, 'importkey' );
+    ok( $got eq $expected, 'correct key: importkey' );
+    ok( ( $res_garbage->{status} == 1 and $res_dsa->{status} == 1 ), 'correct key: import status 1' );
+    ok( ( $res_garbage->{status_msg}  and $res_dsa->{status_msg} ),  'correct key: import status_msg defined' );
 }
 
 # api2_listkeys
